@@ -1,8 +1,10 @@
 Hello, {{user.name}}! <a href="{{ url_for("logout") }}">Logout</a>
 <br>
 <title>{% block title %}{% endblock %}</title>
-<ul>
-{% for repo in repos %}
-  <li><a href="{{ repo.slug }}">{{ repo.slug }}</a></li>
+<table>
+{% for repo in repos|sort(attribute='slug') %}
+    <tr class="{{ loop.cycle('odd', 'even') }}">
+        <td><a href="{{ url_for("jobs", slug=repo.slug) }}">{{ repo.slug|e }}</a></td>
+    </tr>
 {% endfor %}
-</ul>
+</table>

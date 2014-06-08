@@ -1,0 +1,16 @@
+Hello, {{user.name}}! <a href='{{ url_for("logout") }}'>Logout</a>
+<br>
+<title>{% block title %}{% endblock %}</title>
+<table>
+{% for job in jobs %}
+    <tr class='{{ loop.cycle("odd", "even") }}'>
+        <td>Description</td>
+        <td>Edit</td>
+        <td>Remove</td>
+    </tr>
+{% endfor %}
+</table>
+<form name='newjob', method='POST', action='{{ url_for("job", command="new") }}'>
+    <input type='hidden' name='repo_id', value='{{ repo_id }}'>
+    <a href='javascript:document.newjob.submit()'>New job</a>
+</form>

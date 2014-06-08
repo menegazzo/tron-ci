@@ -3,8 +3,8 @@ Hello, {{user.name}}! <a href="{{ url_for("logout") }}">Logout</a>
 <title>{% block title %}{% endblock %}</title>
 <table>
 {% for repo in repos|sort(attribute='slug') %}
-    <tr class="{{ loop.cycle('odd', 'even') }}">
-        <td><a href="{{ url_for("jobs", slug=repo.slug) }}">{{ repo.slug|e }}</a></td>
-    </tr>
+    <tr class="{{ loop.cycle('odd', 'even') }}"><td>
+        <a href='{{ url_for("jobs", repo_id=repo.id) }}'>{{ repo.slug|e }}</a>
+    </td></tr>
 {% endfor %}
 </table>

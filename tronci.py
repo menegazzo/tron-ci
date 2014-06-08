@@ -6,10 +6,10 @@ from flask_github import GitHub
 from sqlalchemy import Column, Integer, Sequence, String
 from sqlalchemy.engine import create_engine
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship, backref
-from sqlalchemy.orm.scoping import scoped_session
+from sqlalchemy.orm import relationship, backref, scoped_session
 from sqlalchemy.orm.session import sessionmaker
-from sqlalchemy.sql.schema import ForeignKey, MetaData
+from sqlalchemy.schema import MetaData, ForeignKey
+from sqlalchemy.types import DateTime
 from travispy import TravisPy
 import config
 
@@ -66,7 +66,7 @@ class APSJob(Base):
 
     __table__ = job_store.jobs_t
 
-    job = relationship('Job', order_by='Job.id', backref='job')
+    job = relationship('Job', uselist=False, backref='aps_job')
 
 
 class Job(Base):
@@ -74,10 +74,10 @@ class Job(Base):
     __tablename__ = 'jobs'
 
     id = Column(Integer, Sequence('job_id_seq'), primary_key=True)
-    job_id = Column(Integer, ForeignKey('apscheduler_jobs.id'))
-    repository_slug = Column(String(500))
-
-    aps_job = relationship('APSJob', backref=backref('aps_job', order_by=id))
+    aps_job_id = Column(Integer, ForeignKey('apscheduler_jobs.id'))
+    repository_id = Column(Integer)
+    created_datetime = Column(DateTime)
+    updated_datetime = Column(DateTime)
 
 
 # App ----------------------------------------------------------------------------------------------
@@ -116,9 +116,21 @@ def repositories():
         return redirect(url_for('login'))
 
 
-@app.route('/jobs/<path:slug>')
-def jobs(slug):
-    return slug
+@app.route('/jobs/<int:repo_id>')
+def jobs(repo_id):
+    user = g.user
+    if user and repo_id:
+        travispy = TravisPy.github_auth(user.github_access_token)
+        github_user = travispy.user()
+        jobs = db_session.query(Job).filter(Job.repository_id == repo_id).order_by(Job.created_datetime)
+        return render_template('jobs.html', user=github_user, jobs=jobs, repo_id=repo_id)
+    else:
+        return redirect(url_for('login'))
+
+
+@app.route('/job/<command>', methods=['POST'])
+def job(command):
+    return 'New job'
 
 
 @app.route('/login')

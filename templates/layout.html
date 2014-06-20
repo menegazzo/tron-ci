@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset='UTF-8'>
+        <link rel=stylesheet type=text/css href='{{ url_for("static", filename="style.css") }}'>
+        <link rel='shortcut icon' href='{{ url_for("static", filename="icon.ico") }}' >
+        <title>Tron CI - Cron jobs for Travis CI</title>
+    </head>
+    <body>
+        <!-- BEGIN: Sticky Header -->
+        <div id="header_container">
+            <div id="header">
+                <table width='100%' cellpadding='8px'>
+                    <tr>
+                        <td><a href='{{ url_for("index") }}'><img src='{{ url_for("static", filename="tron_small.png") }}' alt='Tron CI'></a></td>
+                        {% if not g.user %}
+                            <td align='right'><a class='login' href="{{ url_for('login') }}">Log in with GitHub</a></td>
+                        {% else %}
+                            <td align='right'><a class='login' href="{{ url_for('logout') }}">Log out</a></td>
+                        {% endif %}
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <!-- END: Sticky Header -->
+         
+        <!-- BEGIN: Page Content -->
+        <div id="container">
+            <div id="content">
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+        <!-- END: Page Content -->
+         
+        <!-- BEGIN: Sticky Footer -->
+        <div id="footer_container">
+            <div id="footer">
+                <small>Copyright 2014 by Fabio Menegazzo</small>
+            </div>
+        </div>
+        <!-- END: Sticky Footer -->
+    </body>
+</html>

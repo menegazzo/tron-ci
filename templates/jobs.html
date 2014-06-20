@@ -1,16 +1,34 @@
-Hello, {{user.name}}! <a href='{{ url_for("logout") }}'>Logout</a>
-<br>
-<title>{% block title %}{% endblock %}</title>
-<table>
-{% for job in jobs %}
-    <tr class='{{ loop.cycle("odd", "even") }}'>
-        <td>Description</td>
-        <td>Edit</td>
-        <td>Remove</td>
-    </tr>
-{% endfor %}
-</table>
-<form name='newjob', method='POST', action='{{ url_for("job", command="new") }}'>
-    <input type='hidden' name='repo_id', value='{{ repo_id }}'>
-    <a href='javascript:document.newjob.submit()'>New job</a>
-</form>
+{% extends 'layout.html' %}
+{% block content %}
+    <h2>Jobs ({{ slug }})</h2>
+    <p>Following are enlisted all cron jobs created for {{ slug }} by you and other members.
+    <table>
+        {% if jobs %}
+        <tr class='header'>
+            <td></td><td>Runs</td><td>Next run</td><td>Created</td><td>Remove</td>
+        </tr>
+        {% for job in jobs %}
+        <tr class='{{ loop.cycle("odd", "even") }}'>
+            <td>{{ job }}</td>
+            <td>{{ job.aps_job.runs }}</td>
+            <td>{{ job.aps_job.next_run_time }}</td>
+            <td>{{ job.created }}</td>
+            <td><a href='#removeJob{{ job.id }}'>x</a></td>
+        </tr>
+        <div id='removeJob{{ job.id }}' class='modalDialog'>
+            <div>
+                <h3>Are you sure you want to remove this job?</h3>
+                <p>{{ job }}</p>
+                <ul>
+                    <li><a href='#'>No</a></li>
+                    <li><a href='{{ url_for("jobs", repo_id=repo_id) }}delete/{{ job.id }}/'>Yes</a></li>
+                </ul>
+            </div>
+        </div>
+        {% endfor %}
+        {% endif %}
+    </table>
+    <table><tr><td align='center'><form method='get' action='{{ url_for("jobs", repo_id=repo_id) }}new'>
+        <p><input type=submit value='New job'>
+    </form></td></tr></table>
+{% endblock %}

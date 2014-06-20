@@ -1,10 +1,12 @@
-Hello, {{user.name}}! <a href="{{ url_for("logout") }}">Logout</a>
-<br>
-<title>{% block title %}{% endblock %}</title>
-<table>
-{% for repo in repos|sort(attribute='slug') %}
-    <tr class="{{ loop.cycle('odd', 'even') }}"><td>
-        <a href='{{ url_for("jobs", repo_id=repo.id) }}'>{{ repo.slug|e }}</a>
-    </td></tr>
-{% endfor %}
-</table>
+{% extends 'layout.html' %}
+{% block content %}
+    <h2>Repositories</h2>
+    <p>Following are enlisted all projects you are member of and that are enabled on <b>Travis CI</b>.
+    <table>
+    {% for repo in repos|sort(attribute='slug') %}
+        <tr class="{{ loop.cycle('odd', 'even') }}"><td>
+            <a href='{{ url_for("jobs", repo_id=repo.id) }}'>{{ repo.slug|e }}</a>
+        </td></tr>
+    {% endfor %}
+    </table>
+{% endblock %}

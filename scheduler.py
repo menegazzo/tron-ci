@@ -1,33 +1,10 @@
-from apscheduler.jobstores.sqlalchemy_store import SQLAlchemyJobStore
 from apscheduler.scheduler import Scheduler
-from database import Base, engine
-from sqlalchemy.sql.schema import Column
-from sqlalchemy.sql.sqltypes import Integer
+from database import engine, metadata
 
-
-
-job_store = SQLAlchemyJobStore(engine=engine, tablename='jobs')
-
-
-
-class Job(Base):
-
-    __table__ = job_store.jobs_t
-
-    repo_id = Column(Integer)
-    created_by = 
-
-
-
-scheduler = Scheduler()
-scheduler.add_jobstore(job_store, 'db')
-
-
-@scheduler.interval_schedule(minutes=1)
-def timed_job():
-    print 'This job prints every 1 minute.'
-
-
-scheduler.start()
-while True:
-    pass
+scheduler = Scheduler({
+    'apscheduler.jobstore.default.class': 'apscheduler.jobstores.sqlalchemy_store:SQLAlchemyJobStore',
+    'apscheduler.jobstore.default.engine': engine,
+    'apscheduler.jobstore.default.metadata': metadata,
+    'apscheduler.misfire_grace_time': 600, # 10 minutes
+    'apscheduler.coalesce': True, # Roll several pending executions of jobs into one
+})

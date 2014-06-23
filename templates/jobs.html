@@ -4,16 +4,16 @@
     <p>Following are enlisted all cron jobs created for {{ slug }} by you and other members.
     <table>
         {% if jobs %}
-        <tr class='header'>
+        <tr class='header' align='center'>
             <td></td><td>Runs</td><td>Next run</td><td>Created</td><td>Remove</td>
         </tr>
         {% for job in jobs %}
-        <tr class='{{ loop.cycle("odd", "even") }}'>
+        <tr class='{{ loop.cycle("odd", "even") }}' align='center'>
             <td>{{ job }}</td>
             <td>{{ job.aps_job.runs }}</td>
             <td>{{ job.aps_job.next_run_time }}</td>
             <td>{{ job.created }}</td>
-            <td><a href='#removeJob{{ job.id }}'>x</a></td>
+            <td><a href='#removeJob{{ job.id }}'><img src='{{ url_for("static", filename="remove.png") }}' alt='x'></a></td>
         </tr>
         <div id='removeJob{{ job.id }}' class='modalDialog'>
             <div>

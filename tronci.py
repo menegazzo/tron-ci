@@ -49,6 +49,16 @@ def after_request(response):
     return response
 
 
+@app.errorhandler(403)
+def forbidden(e):
+    return render_template('403.html'), 403
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
+
+
 @app.route('/login/')
 def login():
     return github.authorize(config.GITHUB_SCOPE)
@@ -109,4 +119,4 @@ app.add_url_rule('/jobs/<int:repo_id>/delete/<int:job_id>/', view_func=views.Del
 if __name__ == '__main__':
     from database import init_db
     init_db()
-    app.run(debug=True)
+    app.run(host='0.0.0.0')

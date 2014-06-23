@@ -81,6 +81,10 @@ dt {
     font-size:12px;
 }
 
+.header {
+    font-weight:bold;
+}
+
 .odd {
     background:#CCCCCC;
 }

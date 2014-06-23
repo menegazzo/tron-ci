@@ -3,7 +3,6 @@
 	<name>tron-ci</name>
 	<comment></comment>
 	<projects>
-		<project>travispy</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

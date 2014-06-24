@@ -2,4 +2,5 @@ apscheduler==2.0.3
 flask>=0.10.1,<1
 github-flask>=1.1.1,<2
 sqlalchemy==0.7.9
+travispy>=0.1.0,<2
 wtforms>=2.0.0,<3

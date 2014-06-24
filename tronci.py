@@ -79,7 +79,7 @@ def index():
         return render_template('index.html')
 
 
-@app.route('/github-callback/')
+@app.route('/github-callback')
 @github.authorized_handler
 def authorized(access_token):
     from database import db_session

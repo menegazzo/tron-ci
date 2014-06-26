@@ -3,7 +3,7 @@ from pymongo.mongo_client import MongoClient
 import config
 
 connection = MongoClient(config.DATABASE_URI)
-database = connection['tronci']
+database = connection[config.DATABASE_NAME]
 
 users = database['users']
 users.ensure_index('github_access_token')

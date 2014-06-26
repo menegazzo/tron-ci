@@ -1,19 +1,15 @@
-from sqlalchemy.engine import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import scoped_session
-from sqlalchemy.orm.session import sessionmaker
-from sqlalchemy.schema import MetaData
+from pymongo import ASCENDING
+from pymongo.mongo_client import MongoClient
 import config
 
+connection = MongoClient(config.DATABASE_URI)
+database = connection['tronci']
 
-engine = create_engine(config.DATABASE_URI, echo=False)
-metadata = MetaData(engine)
-db_session = scoped_session(sessionmaker(engine, autoflush=False, autocommit=False))
+users = database['users']
+users.ensure_index('github_access_token')
 
-Base = declarative_base(engine, metadata)
-Base.query = db_session.query_property()
-
-
-def init_db():
-    import models # @UnusedImport
-    Base.metadata.create_all(engine)
+jobs = database['jobs']
+jobs.ensure_index([
+    ('repo_id', ASCENDING),
+    ('created_datetime', ASCENDING),
+])

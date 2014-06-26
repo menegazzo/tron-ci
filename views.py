@@ -1,3 +1,4 @@
+from bson.objectid import ObjectId
 from datetime import datetime
 from flask import redirect, url_for, abort
 from flask.globals import g, request
@@ -5,6 +6,7 @@ from flask.templating import render_template
 from flask.views import MethodView
 from forms import JobForm
 from travispy import TravisPy
+import logging
 
 
 #===================================================================================================
@@ -54,34 +56,25 @@ def forbidden_repo(f):
 # run_build
 #===================================================================================================
 def run_build(user_id, repo_id):
-    from models import User
-    from database import db_session
-
-    db_session()
-
-    filename = '%d_%d.log' % (user_id, repo_id,)
-    with open(filename, 'a') as f:
-        try:
-            user = User.query.get(user_id)
-
-            travispy = TravisPy.github_auth(user.github_access_token)
-            repo = travispy.repo(repo_id)
-            build = travispy.build(repo.last_build_id)
-            build.restart()
-
-        except Exception as e:
-            f.write('%s\n' % str(e))
-
-        else:
-            f.write('Success\n')
-
-    db_session.remove()
+    '''
+    Method responsible for restarting last build for the given repo_id.
+    Given user_id must have access to the repository.
+    '''
+    from database import users
+    user = users.find_one({'_id': ObjectId(user_id)})
+    travispy = TravisPy.github_auth(user['github_access_token'])
+    repo = travispy.repo(repo_id)
+    build = travispy.build(repo.last_build_id)
+    build.restart()
 
 
 #===================================================================================================
 # RepositoriesAPI
 #===================================================================================================
 class RepositoriesAPI(MethodView):
+    '''
+    View responsible for showing all Travis CI repositories that current user has access.
+    '''
 
     decorators = [user_required]
 
@@ -96,25 +89,36 @@ class RepositoriesAPI(MethodView):
 # JobsAPI
 #===================================================================================================
 class JobsAPI(MethodView):
+    '''
+    View responsible for list jobs for repository currently selected.
+    '''
 
     decorators = [user_required, forbidden_repo]
 
     def get(self, repo_id):
-        from database import db_session
-        from models import Job
+        from database import database, jobs
 
         travispy = g.travispy
         github_user = travispy.user()
         repo = travispy.repo(repo_id)
-        jobs = db_session.query(Job).filter(Job.repository_id == repo_id).order_by(Job.created_datetime)
         
-        return render_template('jobs.html', user=github_user, jobs=list(jobs), repo_id=repo_id, slug=repo.slug)
+        aps_jobs = database['aps_jobs']
+
+        tronci_jobs = []
+        for job in jobs.find({'repo_id': repo_id}).sort('created_datetime'):
+            job['aps_job'] = aps_jobs.find_one({'_id': job['aps_job_id']})
+            tronci_jobs.append(job)
+        
+        return render_template('jobs.html', user=github_user, jobs=tronci_jobs, repo_id=repo_id, slug=repo.slug)
 
 
 #===================================================================================================
 # NewJobAPI
 #===================================================================================================
 class NewJobAPI(MethodView):
+    '''
+    View responsible for providing a form to setup a job and save it.
+    '''
 
     decorators = [user_required, forbidden_repo]
 
@@ -128,8 +132,7 @@ class NewJobAPI(MethodView):
 
 
     def post(self, repo_id):
-        from database import db_session
-        from models import Job
+        from database import jobs
         from scheduler import scheduler
 
         form = JobForm(request.form)
@@ -144,20 +147,17 @@ class NewJobAPI(MethodView):
                 request.form['day_of_week'] or None,
                 request.form['hour'] or None,
                 request.form['minute'] or None,
-                args=[user.id, repo_id],
+                args=[str(user['_id']), repo_id],
             )
             scheduler._real_add_job(aps_job, 'default', False)
-
-            now = datetime.now()
-
-            job = Job()
-            job.aps_job_id = aps_job.id
-            job.repository_id = repo_id
-            job.created_datetime = now
-            job.updated_datetime = now
-
-            db_session.add(job)
-            db_session.commit()
+            
+            aps_job_fields = dict((field.name, str(field)) for field in aps_job.trigger.fields)
+            jobs.insert({
+                'aps_job_id': aps_job.id,
+                'repr': '%(minute)s %(hour)s %(day_of_week)s %(week)s %(day)s %(month)s' % aps_job_fields,
+                'repo_id': repo_id,
+                'created_datetime': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            })
 
             return redirect(url_for('jobs', repo_id=repo_id))
 
@@ -171,22 +171,23 @@ class NewJobAPI(MethodView):
 # DeleteJobAPI
 #===================================================================================================
 class DeleteJobAPI(MethodView):
+    '''
+    View responsible for deleting the selected job.
+    '''
 
     decorators = [user_required, forbidden_repo]
 
     def get(self, repo_id, job_id):
-        from database import db_session
-        from models import Job
+        from database import jobs
         from scheduler import scheduler
 
-        job = Job.query.get(job_id)
-        aps_job_id = job.aps_job_id
+        job = jobs.find_one({'_id': ObjectId(job_id)})
+        aps_job_id = job['aps_job_id']
         
         for aps_job in scheduler.get_jobs():
             if aps_job.id == aps_job_id:
                 scheduler.unschedule_job(aps_job)
-                db_session.delete(job)
-                db_session.commit()
+                jobs.remove(job)
                 break
         
         return redirect(url_for('jobs', repo_id=repo_id))

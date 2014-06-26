@@ -1,3 +1,4 @@
+from bson.objectid import ObjectId
 from flask import Flask, session, redirect, url_for
 from flask.globals import g, request
 from flask.templating import render_template
@@ -25,28 +26,19 @@ github = GitHub(app)
 
 # App ----------------------------------------------------------------------------------------------
 
-@app.teardown_appcontext
-def shutdown_session(exception=None):
-    from database import db_session
-    db_session.remove()
-
-
 @app.before_request
 def before_request():
-    from models import User
     from travispy import TravisPy
+    from database import users
 
     g.user = None
+    g.travispy = None
+
     if 'user_id' in session:
-        g.user = user = User.query.get(session['user_id'])
-        g.travispy = TravisPy.github_auth(user.github_access_token)
+        g.user = users.find_one({'_id': ObjectId(session['user_id'])})
 
-
-@app.after_request
-def after_request(response):
-    from database import db_session
-    db_session.remove()
-    return response
+    if g.user is not None:
+        g.travispy = TravisPy.github_auth(g.user['github_access_token'])
 
 
 @app.errorhandler(403)
@@ -82,21 +74,20 @@ def index():
 @app.route('/github-callback')
 @github.authorized_handler
 def authorized(access_token):
-    from database import db_session
-    from models import User
+    from database import users
 
     next_url = request.args.get('next') or url_for('index')
     if access_token is None:
         return redirect(next_url)
 
-    user = User.query.filter_by(github_access_token=access_token).first()
+    user = users.find_one({'github_access_token': access_token})
     if user is None:
-        user = User(access_token)
-        db_session.add(user)
+        user = {'github_access_token': access_token}
+        user_id = users.insert(user)
+    else:
+        user_id = user['_id']
 
-    db_session.commit()
-
-    session['user_id'] = user.id
+    session['user_id'] = str(user_id)
     return redirect(url_for('index'))
 
 
@@ -110,13 +101,11 @@ def get_access_token():
 app.add_url_rule('/repositories/', view_func=views.RepositoriesAPI.as_view('repositories'))
 app.add_url_rule('/jobs/<int:repo_id>/', view_func=views.JobsAPI.as_view('jobs'))
 app.add_url_rule('/jobs/<int:repo_id>/new/', view_func=views.NewJobAPI.as_view('new_job'))
-app.add_url_rule('/jobs/<int:repo_id>/delete/<int:job_id>/', view_func=views.DeleteJobAPI.as_view('delete_job'))
+app.add_url_rule('/jobs/<int:repo_id>/delete/<job_id>/', view_func=views.DeleteJobAPI.as_view('delete_job'))
 
 
 #===================================================================================================
 # __main__
 #===================================================================================================
 if __name__ == '__main__':
-    from database import init_db
-    init_db()
     app.run(host='0.0.0.0')

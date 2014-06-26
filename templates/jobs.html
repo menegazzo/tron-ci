@@ -9,19 +9,19 @@
         </tr>
         {% for job in jobs %}
         <tr class='{{ loop.cycle("odd", "even") }}' align='center'>
-            <td>{{ job }}</td>
+            <td>{{ job.repr }}</td>
             <td>{{ job.aps_job.runs }}</td>
             <td>{{ job.aps_job.next_run_time }}</td>
-            <td>{{ job.created }}</td>
-            <td><a href='#removeJob{{ job.id }}'><img src='{{ url_for("static", filename="remove.png") }}' alt='x'></a></td>
+            <td>{{ job.created_datetime }}</td>
+            <td><a href='#removeJob{{ job._id }}'><img src='{{ url_for("static", filename="remove.png") }}' alt='x'></a></td>
         </tr>
-        <div id='removeJob{{ job.id }}' class='modalDialog'>
+        <div id='removeJob{{ job._id }}' class='modalDialog'>
             <div>
                 <h3>Are you sure you want to remove this job?</h3>
-                <p>{{ job }}</p>
+                <p>{{ job.repr }}</p>
                 <ul>
                     <li><a href='#'>No</a></li>
-                    <li><a href='{{ url_for("jobs", repo_id=repo_id) }}delete/{{ job.id }}/'>Yes</a></li>
+                    <li><a href='{{ url_for("jobs", repo_id=repo_id) }}delete/{{ job._id }}/'>Yes</a></li>
                 </ul>
             </div>
         </div>

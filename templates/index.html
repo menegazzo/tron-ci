@@ -1,8 +1,35 @@
-{% extends 'layout.html' %}
-{% block content %}
-    <table>
-        <tr><td>Welcome to</td></tr>
-        <tr><td><img src='../static/tron.png' alt='Tron CI'></td></tr>
-        <tr><td>Cron jobs for Travis CI</td></tr>
-    </table>
-{% endblock %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset='UTF-8'>
+        <link rel='stylesheet' type='text/css' media='screen' href='{{ url_for("static", filename="index.css") }}'>
+        <link rel='shortcut icon' href='{{ url_for("static", filename="icon.ico") }}' >
+        <title>Tron CI - Cron jobs for Travis CI</title>
+        <!-- Google Analytics -->
+        <script>
+            (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+            })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+            
+            ga('create', 'UA-52349921-1', 'auto');
+            ga('send', 'pageview');
+            
+        </script>
+        <!-- End Google Analytics -->
+    </head>
+    <body>
+        {% if not g.user %}
+            <div id='header'><a class='login' href="{{ url_for('login') }}">Login with GitHub</a></div>
+        {% else %}
+            <div id='header'><a class='login' href="{{ url_for('logout') }}">Log out</a></div>
+        {% endif %}
+        <div id='horizon'>
+            <div id='content'>
+                <div id='welcome'>Welcome to</div><br>
+                <div id='tron'><img src='{{ url_for("static", filename="tron.png") }}'></img></div><br>
+                <div id='description'>Cron jobs for Travis CI</div>
+            </div>
+        </div>
+    </body>
+</html>

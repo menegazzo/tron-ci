@@ -4,8 +4,8 @@ import os
 # Flask variables
 DATABASE_NAME = os.environ['DATABASE_NAME']
 DATABASE_URI = os.environ['DATABASE_URI']
-DEBUG = True
-PROPAGATE_EXCEPTIONS = True
+DEBUG = False
+PROPAGATE_EXCEPTIONS = False
 SECRET_KEY = 'DVsItM4vYgvRZd6G/htFOR/+hGgOjCPPrjdg+6hFZQ6E93r9aivYXyYWC3DnaHU48/0qZtAFJZJB\n0cv57iAwmg==\n'
 
 # GitHub variables

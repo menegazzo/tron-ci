@@ -53,19 +53,59 @@ def forbidden_repo(f):
 
 
 #===================================================================================================
-# run_build
+# run_newest_build
 #===================================================================================================
-def run_build(user_id, repo_id):
+def run_newest_build(user_id, repo_id):
     '''
-    Method responsible for restarting last build for the given repo_id.
+    Method responsible for restarting newest build for the given repo_id.
     Given user_id must have access to the repository.
     '''
-    from database import users
-    user = users.find_one({'_id': ObjectId(user_id)})
+    from database import users, jobs
+
+    user_id = ObjectId(user_id)
+    user = users.find_one({'_id': user_id})
     travispy = TravisPy.github_auth(user['github_access_token'])
-    repo = travispy.repo(repo_id)
-    build = travispy.build(repo.last_build_id)
-    build.restart()
+
+    # When GitHub token is invalid user and jobs created under such token will be removed.
+    if travispy is None:
+        for job in jobs.find({'user_id': user_id, 'repo_id': repo_id}):
+            remove_job(str(job['_id']))
+        users.remove(user_id)
+        return
+
+    # Run newest build.
+    builds = travispy.builds(repository_id=repo_id)
+    if builds:
+        builds[0].restart()
+
+
+#===================================================================================================
+# remove_job
+#===================================================================================================
+def remove_job(job_id):
+    '''
+    Method responsible for removing a job from database.
+
+    :param str job_id:
+        ID of the job that must be removed.
+
+    :rtype: boolean
+    :returns:
+        True when job is removed successfuly.
+    '''
+    from database import jobs
+    from scheduler import scheduler
+
+    job = jobs.find_one({'_id': ObjectId(job_id)})
+    aps_job_id = job['aps_job_id']
+
+    for aps_job in scheduler.get_jobs():
+        if aps_job.id == aps_job_id:
+            scheduler.unschedule_job(aps_job)
+            jobs.remove(job)
+            return True
+
+    return False
 
 
 #===================================================================================================
@@ -101,14 +141,14 @@ class JobsAPI(MethodView):
         travispy = g.travispy
         github_user = travispy.user()
         repo = travispy.repo(repo_id)
-        
+
         aps_jobs = database['aps_jobs']
 
         tronci_jobs = []
         for job in jobs.find({'repo_id': repo_id}).sort('created_datetime'):
             job['aps_job'] = aps_jobs.find_one({'_id': job['aps_job_id']})
             tronci_jobs.append(job)
-        
+
         return render_template('jobs.html', user=github_user, jobs=tronci_jobs, repo_id=repo_id, slug=repo.slug)
 
 
@@ -138,8 +178,10 @@ class NewJobAPI(MethodView):
         form = JobForm(request.form)
         if form.validate():
             user = g.user
+            user_id = user['_id']
+
             aps_job = scheduler.add_cron_job(
-                run_build,
+                run_newest_build,
                 None,
                 request.form['month'] or None,
                 request.form['day'] or None,
@@ -147,14 +189,15 @@ class NewJobAPI(MethodView):
                 request.form['day_of_week'] or None,
                 request.form['hour'] or None,
                 request.form['minute'] or None,
-                args=[str(user['_id']), repo_id],
+                args=[str(user_id), repo_id],
             )
             scheduler._real_add_job(aps_job, 'default', False)
-            
+
             aps_job_fields = dict((field.name, str(field)) for field in aps_job.trigger.fields)
             jobs.insert({
                 'aps_job_id': aps_job.id,
                 'repr': '%(minute)s %(hour)s %(day_of_week)s %(week)s %(day)s %(month)s' % aps_job_fields,
+                'user_id': user_id,
                 'repo_id': repo_id,
                 'created_datetime': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
             })
@@ -183,11 +226,11 @@ class DeleteJobAPI(MethodView):
 
         job = jobs.find_one({'_id': ObjectId(job_id)})
         aps_job_id = job['aps_job_id']
-        
+
         for aps_job in scheduler.get_jobs():
             if aps_job.id == aps_job_id:
                 scheduler.unschedule_job(aps_job)
                 jobs.remove(job)
                 break
-        
+
         return redirect(url_for('jobs', repo_id=repo_id))

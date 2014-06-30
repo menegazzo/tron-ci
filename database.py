@@ -11,5 +11,6 @@ users.ensure_index('github_access_token')
 jobs = database['jobs']
 jobs.ensure_index([
     ('repo_id', ASCENDING),
+    ('user_id', ASCENDING),
     ('created_datetime', ASCENDING),
 ])

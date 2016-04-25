@@ -1,2 +1,5 @@
 *.db
 *.pyc
+static/components/
+.project
+.pydevproject

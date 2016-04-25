@@ -1,0 +1,38 @@
+<md-dialog aria-label="Cron Job" flex="40" ng-cloak>
+  <form name="myForm">
+    <md-toolbar>
+      <div class="md-toolbar-tools">
+        <h2>Cron Job</h2>
+        <span flex></span>
+        <md-button class="md-icon-button" ng-click="cancel()">X</md-button>
+      </div>
+    </md-toolbar>
+    <md-dialog-content>
+      <div class="md-dialog-content">
+        <md-input-container class="md-block">
+          <label>Repository</label>
+          <md-select ng-model="selectedRepo" required>
+            <md-option>One</md-option>
+            <md-option>Two</md-option>
+          </md-select>
+          <div class="errors" ng-messages="myForm.myModel.$error" ng-if="myForm.$dirty">
+            <div ng-message="required">Required</div>
+          </div>
+        </md-input-container>
+        <cron-selection config="cronConfig" output="cronOutput" template="cron-template/"></cron-selection>
+      </div>
+    </md-dialog-content>
+    <md-dialog-actions layout="row">
+      <md-button>
+        Delete
+      </md-button>
+      <span flex></span>
+      <md-button style="margin-right:20px;">
+        Save
+      </md-button>
+      <md-button style="margin-right:20px;">
+        Create
+      </md-button>
+    </md-dialog-actions>
+  </form>
+</md-dialog>

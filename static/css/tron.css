@@ -1,0 +1,15 @@
+md-toolbar {
+  background-color: #424242 !important;
+}
+
+.btn-add-new-job {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #d23f31 !important;
+}
+
+.sign-up-icon {
+  vertical-align: middle;
+  margin-right: 5;
+}

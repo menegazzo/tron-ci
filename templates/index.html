@@ -1,35 +1,40 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <meta charset='UTF-8'>
-        <link rel='stylesheet' type='text/css' media='screen' href='{{ url_for("static", filename="index.css") }}'>
-        <link rel='shortcut icon' href='{{ url_for("static", filename="icon.ico") }}' >
-        <title>Tron CI - Cron jobs for Travis CI</title>
-        <!-- Google Analytics -->
-        <script>
-            (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-            })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-            
-            ga('create', 'UA-52349921-1', 'auto');
-            ga('send', 'pageview');
-            
-        </script>
-        <!-- End Google Analytics -->
-    </head>
-    <body>
-        {% if not g.user %}
-            <div id='header'><a class='login' href="{{ url_for('login') }}">Login with GitHub</a></div>
-        {% else %}
-            <div id='header'><a class='login' href="{{ url_for('logout') }}">Log out</a></div>
-        {% endif %}
-        <div id='horizon'>
-            <div id='content'>
-                <div id='welcome'>Welcome to</div><br>
-                <div id='tron'><img src='{{ url_for("static", filename="tron.png") }}'></img></div><br>
-                <div id='description'>Cron jobs for Travis CI</div>
-            </div>
-        </div>
-    </body>
+<html lang="en" >
+
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href='{{ url_for("static", filename="components/angular-material/angular-material.min.css") }}'>
+  <link rel="stylesheet" href='{{ url_for("static", filename="css/tron.css") }}'>
+  <script src='{{ url_for("static", filename="components/angular/angular.min.js") }}'></script>
+  <script src='{{ url_for("static", filename="components/angular-animate/angular-animate.min.js") }}'></script>
+  <script src='{{ url_for("static", filename="components/angular-aria/angular-aria.min.js") }}'></script>
+  <script src='{{ url_for("static", filename="components/angular-messages/angular-messages.min.js") }}'></script>
+  <script src='{{ url_for("static", filename="components/angular-cron-jobs/dist/angular-cron-jobs.min.js") }}'></script>
+  <script src='{{ url_for("static", filename="components/angular-material/angular-material.min.js") }}'></script>
+  <script src='{{ url_for("static", filename="components/satellizer/satellizer.min.js") }}'></script>
+</head>
+
+<body ng-app='tronApp' ng-cloak>
+  <div ng-controller='tronCtrl' ng-cloak>
+    <md-toolbar>
+      <div class='md-toolbar-tools'>
+        <img src='{{ url_for("static", filename="img/tron_small.png") }}'/>
+        <span flex></span>
+        <md-button ng-if="!isAuthenticated" ng-click="login()">
+          <img class="sign-up-icon" src='{{ url_for("static", filename="img/github.png") }}'/>
+          Login
+        </md-button>
+        <md-button ng-if="isAuthenticated" ng-click="logout()">
+          Logout
+        </md-button>
+      </div>
+    </md-toolbar>
+    <md-content layout-xs="column" layout="row">
+    </md-content>
+    <md-button class="md-fab btn-add-new-job" aria-label="New job" ng-if="isAuthenticated" ng-click="addNewJobDialog($event)">
+      <img src='{{ url_for("static", filename="img/plus.png") }}'/>
+    </md-button>
+  </div>
+  <script src='{{ url_for("static", filename="js/tron.js") }}'></script>
+
+</body>
 </html>

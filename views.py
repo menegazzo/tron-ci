@@ -1,12 +1,10 @@
 from bson.objectid import ObjectId
-from datetime import datetime
 from flask import redirect, url_for, abort
 from flask.globals import g, request
 from flask.templating import render_template
 from flask.views import MethodView
 from forms import JobForm
 from travispy import TravisPy
-import logging
 
 
 #===================================================================================================
@@ -169,68 +167,3 @@ class NewJobAPI(MethodView):
         repo = travispy.repo(repo_id)
 
         return render_template('job_form.html', form=form, repo_id=repo_id, command='new', slug=repo.slug)
-
-
-    def post(self, repo_id):
-        from database import jobs
-        from scheduler import scheduler
-
-        form = JobForm(request.form)
-        if form.validate():
-            user = g.user
-            user_id = user['_id']
-
-            aps_job = scheduler.add_cron_job(
-                run_newest_build,
-                None,
-                request.form['month'] or None,
-                request.form['day'] or None,
-                request.form['week'] or None,
-                request.form['day_of_week'] or None,
-                request.form['hour'] or None,
-                request.form['minute'] or None,
-                args=[str(user_id), repo_id],
-            )
-            scheduler._real_add_job(aps_job, 'default', False)
-
-            aps_job_fields = dict((field.name, str(field)) for field in aps_job.trigger.fields)
-            jobs.insert({
-                'aps_job_id': aps_job.id,
-                'repr': '%(minute)s %(hour)s %(day_of_week)s %(week)s %(day)s %(month)s' % aps_job_fields,
-                'user_id': user_id,
-                'repo_id': repo_id,
-                'created_datetime': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-            })
-
-            return redirect(url_for('jobs', repo_id=repo_id))
-
-        else:
-            travispy = g.travispy
-            repo = travispy.repo(repo_id)
-            return render_template('job_form.html', form=form, repo_id=repo_id, command='new', slug=repo.slug)
-
-
-#===================================================================================================
-# DeleteJobAPI
-#===================================================================================================
-class DeleteJobAPI(MethodView):
-    '''
-    View responsible for deleting the selected job.
-    '''
-
-    decorators = [user_required, forbidden_repo]
-
-    def get(self, repo_id, job_id):
-        from database import jobs
-        from scheduler import scheduler
-
-        job = jobs.find_one({'_id': ObjectId(job_id)})
-        aps_job_id = job['aps_job_id']
-
-        for aps_job in scheduler.get_jobs():
-            if aps_job.id == aps_job_id:
-                scheduler.unschedule_job(aps_job)
-                jobs.remove(job)
-                break
-
-        return redirect(url_for('jobs', repo_id=repo_id))

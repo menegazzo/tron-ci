@@ -13,3 +13,88 @@ md-toolbar {
   vertical-align: middle;
   margin-right: 5;
 }
+
+.content{
+  padding: 2em;
+}
+
+.job-success{
+  border-left: 5px solid #39aa56;
+  box-shadow:rgba(0, 0, 0, 0.3) 0 5px 5px 0;
+  -webkit-box-shadow:rgba(0, 0, 0, 0.3) 0 5px 5px 0;
+  -moz-box-shadow:rgba(0, 0, 0, 0.3) 0 5px 5px 0;
+  cursor:pointer;
+  outline:none;
+}
+
+.job-success:hover{
+  background: #deecdc;
+  border-left: 5px solid #39aa56;
+}
+
+.job-fail{
+  border-left: 5px solid #db4545;
+  box-shadow:rgba(0, 0, 0, 0.3) 0 5px 5px 0;
+  -webkit-box-shadow:rgba(0, 0, 0, 0.3) 0 5px 5px 0;
+  -moz-box-shadow:rgba(0, 0, 0, 0.3) 0 5px 5px 0;
+  cursor:pointer;
+  outline:none;
+}
+
+.job-fail:hover{
+  background: #fce8e2;
+  border-left: 5px solid #db4545;
+}
+
+.job-fail-headline{
+  color: #db4545 !important;
+  font-size: 14px !important;
+  font-weight: bold !important;
+}
+
+.job-title{
+  padding: 0 16px 16px !important;
+}
+
+.job-success-headline{
+  color: #39aa56 !important;
+  font-size: 14px !important;
+  font-weight: bold !important;
+}
+
+.job-content{
+  text-align: center;
+}
+
+.job-content span{
+  font-size: 24px;
+}
+
+.job-footer{
+  font-size: 12px;
+  text-align: right;
+}
+
+.job-add{
+  cursor:pointer;
+  border: none;
+  outline:none;
+  box-shadow:rgba(0, 0, 0, 0.3) 0 5px 5px 0;
+  -webkit-box-shadow:rgba(0, 0, 0, 0.3) 0 5px 5px 0;
+  -moz-box-shadow:rgba(0, 0, 0, 0.3) 0 5px 5px 0;
+}
+
+.job-add:hover .job-add-content i{
+	z-index:1000;
+  color: #39aa56;
+}
+
+.job-add:active{
+  border: none;
+}
+
+.job-add-content{
+  position:relative;
+  top: calc(50% - 56px);
+  color: #424242;
+}

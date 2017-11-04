@@ -14,7 +14,8 @@
     "angular": "^1.5.3",
     "angular-material": "^1.0.7",
     "angular-cron-jobs": "^1.4.1",
-    "satellizer": "^0.14.0"
+    "satellizer": "^0.14.0",
+    "font-awesome": "^4.6.3"
   },
   "resolutions": {
     "angular": "1.5.5"

@@ -4,6 +4,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href='{{ url_for("static", filename="components/angular-material/angular-material.min.css") }}'>
   <link rel="stylesheet" href='{{ url_for("static", filename="css/tron.css") }}'>
+  <link rel="stylesheet" href='{{ url_for("static", filename="components/font-awesome/css/font-awesome.min.css") }}'>
   <script src='{{ url_for("static", filename="components/angular/angular.min.js") }}'></script>
   <script src='{{ url_for("static", filename="components/angular-animate/angular-animate.min.js") }}'></script>
   <script src='{{ url_for("static", filename="components/angular-aria/angular-aria.min.js") }}'></script>
@@ -11,6 +12,7 @@
   <script src='{{ url_for("static", filename="components/angular-cron-jobs/dist/angular-cron-jobs.min.js") }}'></script>
   <script src='{{ url_for("static", filename="components/angular-material/angular-material.min.js") }}'></script>
   <script src='{{ url_for("static", filename="components/satellizer/satellizer.min.js") }}'></script>
+
 </head>
 
 <body ng-app='tronApp' ng-cloak>
@@ -28,7 +30,69 @@
         </md-button>
       </div>
     </md-toolbar>
-    <md-content layout-xs="column" layout="row">
+    <md-content layout-xs="column" layout="row" class="content" layout-wrap>
+      <div flex="25" layout="column" ng-repeat="i in [1, 2, 3, 4, 5, 6]">
+        <md-card class="job-success" style="max-height: 138px;">
+
+          <md-card-title class="job-title">
+            <md-card-title-text>
+              <span class="md-headline job-success-headline">
+                <i class="fa fa-check" aria-hidden="true" style="padding-right: 2px;"></i>
+                menegazzo/tron-ci
+              </span>
+            </md-card-title-text>
+          </md-card-title>
+          <md-card-content class="job-content">
+            <span>0 */12 * * *</span>
+          </md-card-content>
+          <md-card-footer class="job-footer">
+            <span>Will start in Januray 1st at 08:42:02</span>
+            <i class="fa fa-clock-o" aria-hidden="true"></i>
+          </md-card-footer>
+
+        </md-card>
+      </div>
+
+      <div flex="25" layout="column">
+        <md-card class="job-fail" style="max-height: 138px;">
+
+          <md-card-title class="job-title">
+            <md-card-title-text>
+              <span class="md-headline job-fail-headline">
+                <i class="fa fa-check" aria-hidden="true" style="padding-right: 2px;"></i>
+                menegazzo/tron-ci
+              </span>
+            </md-card-title-text>
+          </md-card-title>
+          <md-card-content class="job-content">
+            <span>0 */12 * * *</span>
+          </md-card-content>
+          <md-card-footer class="job-footer">
+            <span>Will start in Januray 1st at 08:42:02</span>
+            <i class="fa fa-clock-o" aria-hidden="true"></i>
+          </md-card-footer>
+
+        </md-card>
+      </div>
+
+      <div flex="25" layout="column">
+        <md-card style="text-align: center; max-height: 138px;" ng-click="addNewJobDialog($event)" class="job-add">
+
+          <md-card-title class="job-add-title">
+            <!-- <md-card-title-text>
+              <span class="md-headline job-headline">
+              </span>
+            </md-card-title-text> -->
+          </md-card-title>
+          <md-card-content class="job-add-content">
+            <i class="fa fa-plus-circle fa-4x" aria-hidden="true"></i>
+          </md-card-content>
+          <md-card-footer class="job-add-footer">
+          </md-card-footer>
+
+        </md-card>
+
+      </div>
     </md-content>
     <md-button class="md-fab btn-add-new-job" aria-label="New job" ng-if="isAuthenticated" ng-click="addNewJobDialog($event)">
       <img src='{{ url_for("static", filename="img/plus.png") }}'/>
